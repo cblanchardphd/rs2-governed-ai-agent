@@ -25,23 +25,23 @@ import importlib.util
 # Path setup — RS2 RI files use hyphens in filenames; load via importlib
 # ---------------------------------------------------------------------------
 RS2_ROOT = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), "..", "..", "00-Canonical", "RS2")
+    os.path.join(os.path.dirname(__file__), "rs2")
 )
 
-def _load(alias: str, rel_path: str):
-    full = os.path.join(RS2_ROOT, rel_path)
+def _load(alias: str, filename: str):
+    full = os.path.join(RS2_ROOT, filename)
     spec = importlib.util.spec_from_file_location(alias, full)
     mod = importlib.util.module_from_spec(spec)
     sys.modules[alias] = mod  # register before exec so dataclass __module__ resolves
     spec.loader.exec_module(mod)
     return mod
 
-_identity    = _load("rs2_identity",    "01-identity/RS2-Identity_RI.py")
-_authority   = _load("rs2_authority",   "02-authority/RS2-Authority_RI.py")
-_attestation = _load("rs2_attestation", "03-attestation/RS2-Attestation_RI.py")
-_ge          = _load("rs2_ge",          "06-governance_envelope/RS2-GovernanceEnvelope_RI.py")
-_lifecycle   = _load("rs2_lifecycle",   "08-lifecycle_state/RS2-LifecycleState_RI.py")
-_revocation  = _load("rs2_revocation",  "10-revocation/RS2-Revocation_RI.py")
+_identity    = _load("rs2_identity",    "RS2-Identity_RI.py")
+_authority   = _load("rs2_authority",   "RS2-Authority_RI.py")
+_attestation = _load("rs2_attestation", "RS2-Attestation_RI.py")
+_ge          = _load("rs2_ge",          "RS2-GovernanceEnvelope_RI.py")
+_lifecycle   = _load("rs2_lifecycle",   "RS2-LifecycleState_RI.py")
+_revocation  = _load("rs2_revocation",  "RS2-Revocation_RI.py")
 
 IdentityEngine           = _identity.IdentityEngine
 AuthorityEngine          = _authority.AuthorityEngine

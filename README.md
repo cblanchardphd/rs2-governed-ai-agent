@@ -28,11 +28,7 @@ Requires an Anthropic API key.
 - `anthropic` package for the agent demo: `pip install anthropic`
 - Anthropic API key for the agent demo
 
-The RS2 primitive stack (stdlib only, no dependencies) must be present at:
-```
-../../00-Canonical/RS2/
-```
-This repo is designed to sit inside the Liverion RS2 workspace. For standalone use, clone the RS2 reference implementation alongside it and adjust the path in `RS2_ROOT`.
+The RS2 primitive stack is included in the `rs2/` directory (stdlib only, no external dependencies).
 
 ---
 
