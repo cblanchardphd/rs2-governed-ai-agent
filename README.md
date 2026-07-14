@@ -4,7 +4,7 @@
 
 This repository demonstrates the Risk-Surface Reduction Substrate (RS2) governing a live AI agent — a Claude instance making real decisions, under a formal delegation chain, with every action recorded as an immutable attestation and authority revocable mid-session.
 
-Built on IETF RATS RFC 9334 / RFC 9335. 39 US patents pending — Perkins Coie.
+Built on IETF RATS RFC 9334 / RFC 9335. 39 US patents pending — Ashurst Perkins Coie.
 
 ---
 
