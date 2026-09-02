@@ -1,10 +1,12 @@
 # RS2 Governed AI Agent Demo
 
-**What 32 IETF drafts are trying to specify. RS2 runs it today.**
+**What the standards bodies are still drafting. RS2 runs it today.**
 
 This repository demonstrates the Risk-Surface Reduction Substrate (RS2) governing a live AI agent — a Claude instance making real decisions, under a formal delegation chain, with every action recorded as an immutable attestation and authority revocable mid-session.
 
-Built on IETF RATS RFC 9334 / RFC 9335. 39 US patents pending — Ashurst Perkins Coie.
+Built on IETF RATS (RFC 9334, Remote ATtestation Procedures Architecture, ratified 2023).
+Protected by over three dozen U.S. provisional patent applications, consolidating into five
+master U.S. utility filings — RS2, CH2, CSS, TwinOps, and AMX — prosecuted by Ashurst Perkins Coie.
 
 ---
 
@@ -71,9 +73,9 @@ The governance layer does not depend on the agent's cooperation.
 | Layer | Component |
 |---|---|
 | Substrate | RS2 — 10 primitives (Identity, Authority, Attestation AT1–AT5, Conformance, Evaluation, GovernanceEnvelope, Jurisdiction, LifecycleState, PermissionObject, Revocation) |
-| Clearinghouse | CH2 — Civix Clearinghouse (issuer-pays, $0.01/event) |
+| Clearinghouse | CH2 |
 | Settlement | CSS — Clearing Settlement Stack |
-| Standard | IETF RATS RFC 9334 / RFC 9335 |
+| Standard | IETF RATS RFC 9334 |
 
-Loquitur — a Liverion Corp. platform / Civix Systems Inc.  
+Loquitur — a Liverion Corp. platform  
 chris@liverion.io · liverion.io

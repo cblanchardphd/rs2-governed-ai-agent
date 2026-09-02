@@ -284,8 +284,8 @@ print("""
     Every AT3 attestation is a CH2 billing event.
     Governance is a ledger — not a kill switch.
 
-  Next step → RILA
-    Execute the Reference Implementation Licensing Agreement.
+  Next step → Evaluation License Agreement
+    Execute the Evaluation License Agreement.
     Embed RS2 in the PINN node firmware.
     Every PINN node on SH 130, Corpus Christi, and Camp Mabry
     becomes a CH2 clearinghouse billing point.

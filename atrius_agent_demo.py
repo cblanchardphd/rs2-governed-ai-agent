@@ -414,6 +414,6 @@ print(f"""
     Revocation is immediate, non-negotiable, and permanent.
     The governance layer does not depend on the agent's cooperation.
 
-  This is what 32 IETF drafts are trying to specify.
+  This is what the standards bodies are still drafting.
   RS2 runs it. Today. On a MacBook Air.
 """)
