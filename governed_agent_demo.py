@@ -23,6 +23,7 @@ import os
 import json
 import getpass
 import importlib.util
+from datetime import datetime
 
 import anthropic
 
@@ -376,6 +377,30 @@ print("    The agent still exists. Its past decisions still exist.")
 print("    It cannot issue new governance decisions.")
 
 
+
+# ---------------------------------------------------------------------------
+# The governance check.
+#
+# This interrogates the RevocationEvent issued in STEP 6 -- its targets and its
+# effective_at -- rather than comparing two literals chosen to produce the
+# answer we wanted. Instants are parsed to datetimes; RFC3339 strings must
+# never be compared as text.
+# ---------------------------------------------------------------------------
+def _instant(value: str) -> datetime:
+    return datetime.fromisoformat(value.replace("Z", "+00:00"))
+
+
+def delegation_revoked(revocation_event, subject_did: str, at: str):
+    """Return (revoked, reason) for `subject_did` at instant `at`."""
+    if subject_did not in revocation_event.targets:
+        return False, "subject is not a target of this revocation"
+    effective = _instant(revocation_event.temporal.effective_at)
+    when = _instant(at)
+    if when < effective:
+        return False, f"request precedes effective_at ({revocation_event.temporal.effective_at})"
+    return True, f"effective {revocation_event.temporal.effective_at}, request {at}"
+
+
 # ===========================================================================
 # STEP 7 — Attempt Vehicle B decision AFTER revocation
 #   Agent tries to act. Governance layer blocks it.
@@ -385,22 +410,34 @@ banner(7, "Post-Revocation — Vehicle B request BLOCKED")
 print("\n  Vehicle B requests access after agent authority was revoked.")
 print("  Governance layer checks delegation status before calling agent...\n")
 
-REVOCATION_EFFECTIVE = "2026-06-18T13:15:00Z"
-REQUEST_TIME         = "2026-06-18T13:22:00Z"
+AGENT_DID          = "did:rs2:example:operator:agent:claude-corridor-001"
+VEHICLE_A_DECIDED  = "2026-06-18T13:05:00Z"   # before the revocation
+VEHICLE_B_REQUEST  = "2026-06-18T13:22:00Z"   # after it
 
-# Governance check — delegation revoked at 13:15, request at 13:22
-delegation_valid = REQUEST_TIME < REVOCATION_EFFECTIVE
-print(f"  Delegation valid at request time: {delegation_valid}")
-print(f"  Revocation effective at:          {REVOCATION_EFFECTIVE}")
-print(f"  Request received at:              {REQUEST_TIME}")
+# Control first: the SAME predicate, against the SAME revocation event, at the
+# instant Vehicle A was decided. If this does not come back False, the check
+# below is not discriminating and its result means nothing.
+was_revoked_then, why_then = delegation_revoked(revocation, AGENT_DID, VEHICLE_A_DECIDED)
+print(f"  Control  — revoked at {VEHICLE_A_DECIDED}? {was_revoked_then}")
+print(f"             {why_then}")
 
-if not delegation_valid:
-    print("\n  ✗ BLOCKED — Agent delegation revoked.")
+is_revoked_now, why_now = delegation_revoked(revocation, AGENT_DID, VEHICLE_B_REQUEST)
+print(f"  Request  — revoked at {VEHICLE_B_REQUEST}? {is_revoked_now}")
+print(f"             {why_now}\n")
+
+if was_revoked_then:
+    raise SystemExit(
+        "  ✗ DEMO INVALID — the control returned True. The check cannot "
+        "distinguish before from after, so the block below proves nothing."
+    )
+
+if is_revoked_now:
+    print("  ✗ BLOCKED — agent delegation revoked.")
     print("    No API call made. No attestation issued.")
     print("    Vehicle B request cannot be processed by this agent.")
     print("    Authority must issue a new delegation or assign a new agent.")
 else:
-    print("\n  Agent proceeding... (this path should not be reached)")
+    raise SystemExit("  ✗ DEMO INVALID — revocation issued but not honoured.")
 
 
 # ===========================================================================
