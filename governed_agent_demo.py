@@ -1,26 +1,21 @@
 """
-ATRIUS / Liverion RS2 — Governed AI Agent Demo
+OPERATOR / Liverion RS2 — Governed AI Agent Demo
 ===============================================
-Scenario: ATRIUS delegates authority to a Claude AI agent to govern
-          vehicle access decisions on the SH 130 PINN corridor.
+Scenario: OPERATOR delegates authority to a Claude AI agent to govern
+          vehicle access decisions on the the corridor PINN corridor.
           The agent must operate within a scoped RS2 GovernanceEnvelope.
           Its decisions are recorded as AT3 attestations.
           Its authority is revoked mid-session to demonstrate live governance.
 
 This is the AT5 Delegation scenario — T6 Relationship identity type.
-Principal: ATRIUS Industries
+Principal: the operator
 Agent:     Claude (claude-haiku-4-5-20251001 — fast, sufficient for governance decisions)
 Subject:   Connected vehicles requesting PINN node access
 
 No dependencies beyond: anthropic  (pip3.12 install anthropic)
 Requires Python 3.10+
-Run: python3.12 atrius_agent_demo.py
+Run: python3.12 operator_agent_demo.py
 
-  ------------------------------------------------------------------
-  The corridor and node locations are real. The traffic is simulated.
-  THE AUTHORITY MODEL IS PROPOSED - authored for this demonstration;
-  no party named has agreed to or endorsed it. The governance is real.
-  ------------------------------------------------------------------
 """
 
 import sys
@@ -34,10 +29,11 @@ import anthropic
 
 DISCLOSURE = """
   ------------------------------------------------------------------------
-  The corridor and node locations are real. The traffic is simulated.
-  THE AUTHORITY MODEL IS PROPOSED — authored for this demonstration; no
-  party named has agreed to or endorsed it. The governance is real: the
-  primitives, attestations and revocation run exactly as shown.
+  The corridor is real. THE NODE LOCATIONS ARE PROPOSED, and so is the
+  authority model — the operator and its agreements were authored for this
+  demonstration; no real party appears here. The traffic is simulated.
+  The governance is real: the delegation, the recorded decisions and the
+  revocation run exactly as shown.
   ------------------------------------------------------------------------
 """
 print(DISCLOSURE)
@@ -150,22 +146,22 @@ id_engine = IdentityEngine()
 
 principal = id_engine.issue(
     rs2_version="1.0",
-    identity_id="did:rs2:us-tx:atrius:principal",
-    controller="did:rs2:us-tx:atrius:authority",
+    identity_id="did:rs2:us-tx:operator:principal",
+    controller="did:rs2:us-tx:operator:authority",
     lifecycle_state="active",
-    jurisdiction="US-TX",
-    metadata={"label": "ATRIUS Industries — Principal"}
+    jurisdiction="US-XX",
+    metadata={"label": "the operator — Principal"}
 )
-show("Principal (ATRIUS)", principal)
+show("Principal (OPERATOR)", principal)
 
 agent = id_engine.issue(
     rs2_version="1.0",
-    identity_id="did:rs2:us-tx:atrius:agent:claude-corridor-001",
-    controller="did:rs2:us-tx:atrius:authority",
+    identity_id="did:rs2:us-tx:operator:agent:claude-corridor-001",
+    controller="did:rs2:us-tx:operator:authority",
     lifecycle_state="active",
-    jurisdiction="US-TX",
+    jurisdiction="US-XX",
     metadata={
-        "label": "Claude AI Agent — SH 130 corridor governance",
+        "label": "Claude AI Agent — the corridor governance",
         "model": "claude-haiku-4-5-20251001",
         "function": "vehicle-access-governance",
     }
@@ -177,7 +173,7 @@ vehicle_a = id_engine.issue(
     identity_id="did:rs2:us:vehicle:truck-convoy-alpha-01",
     controller="did:rs2:us:oem:fleet-authority",
     lifecycle_state="active",
-    jurisdiction="US-TX",
+    jurisdiction="US-XX",
     metadata={"label": "Convoy Alpha — commercial autonomous truck", "class": "Class-8"}
 )
 
@@ -186,7 +182,7 @@ vehicle_b = id_engine.issue(
     identity_id="did:rs2:us:vehicle:van-delivery-beta-07",
     controller="did:rs2:us:oem:fleet-authority",
     lifecycle_state="active",
-    jurisdiction="US-TX",
+    jurisdiction="US-XX",
     metadata={"label": "Delivery Van Beta-07 — last-mile autonomous", "class": "Class-3"}
 )
 
@@ -195,45 +191,45 @@ print(f"  ✓ Vehicle B: {vehicle_b.identity_id}")
 
 
 # ===========================================================================
-# STEP 2 — ATRIUS issues Authority Object
+# STEP 2 — OPERATOR issues Authority Object
 # ===========================================================================
-banner(2, "Issue Authority Object (ATRIUS)")
+banner(2, "Issue Authority Object (OPERATOR)")
 
 auth_engine = AuthorityEngine()
 
-atrius_auth = auth_engine.construct(
+operator_auth = auth_engine.construct(
     rs2_version="1.0",
-    authority_id="did:rs2:us-tx:atrius:authority",
+    authority_id="did:rs2:us-tx:operator:authority",
     authority_type="infrastructure operator authority",
-    jurisdictions=["US-TX", "US"],
+    jurisdictions=["US-XX", "US"],
     object_types=["attestation", "identity-object", "permission-object"],
     constraints={"domain": "connected-infrastructure", "platform": "PINN"},
-    metadata={"label": "ATRIUS Industries — PINN Network Authority"}
+    metadata={"label": "the operator — PINN Network Authority"}
 )
-show("ATRIUS Authority Object", atrius_auth)
+show("OPERATOR Authority Object", operator_auth)
 
 
 # ===========================================================================
-# STEP 3 — Issue AT5 Delegation: ATRIUS → Claude Agent
+# STEP 3 — Issue AT5 Delegation: OPERATOR → Claude Agent
 #   This is the governance instrument that authorizes the agent to act.
-#   Scoped to vehicle access decisions on SH 130 only.
+#   Scoped to vehicle access decisions on the corridor only.
 # ===========================================================================
-banner(3, "Issue AT5 Delegation — ATRIUS delegates to Claude Agent")
+banner(3, "Issue AT5 Delegation — OPERATOR delegates to Claude Agent")
 
 att_engine = AttestationEngine()
 
 delegation = att_engine.issue(
     rs2_version="1.0",
-    attestation_id="att-atrius-delegation-claude-001",
-    subject_identity="did:rs2:us-tx:atrius:agent:claude-corridor-001",
-    issuing_authority="did:rs2:us-tx:atrius:authority",
+    attestation_id="att-operator-delegation-claude-001",
+    subject_identity="did:rs2:us-tx:operator:agent:claude-corridor-001",
+    issuing_authority="did:rs2:us-tx:operator:authority",
     assertion=(
-        "ATRIUS Industries delegates vehicle access governance authority to "
-        "Claude AI agent claude-corridor-001 for SH 130 corridor PINN node operations; "
+        "the operator delegates vehicle access governance authority to "
+        "Claude AI agent claude-corridor-001 for the corridor PINN node operations; "
         "scope: approve or deny vehicle connectivity requests; "
-        "jurisdiction: US-TX; revocable at any time by issuing authority"
+        "jurisdiction: US-XX; revocable at any time by issuing authority"
     ),
-    governance_envelope="ge-atrius-agent-session-001",
+    governance_envelope="ge-operator-agent-session-001",
     asserted_at="2026-06-18T13:00:00Z",
     valid_from="2026-06-18T13:00:00Z",
     valid_until="2026-06-18T14:00:00Z",
@@ -248,14 +244,14 @@ print("    back to this delegation record.")
 # ===========================================================================
 # STEP 4 — Open GovernanceEnvelope for the agent session
 # ===========================================================================
-banner(4, "Open GovernanceEnvelope — Agent session on SH 130")
+banner(4, "Open GovernanceEnvelope — Agent session on the corridor")
 
 ge_engine = GovernanceEnvelopeEngine()
 
 governance_bounds = {
-    "principal": "did:rs2:us-tx:atrius:authority",
-    "agent": "did:rs2:us-tx:atrius:agent:claude-corridor-001",
-    "corridor": "SH-130, Austin TX",
+    "principal": "did:rs2:us-tx:operator:authority",
+    "agent": "did:rs2:us-tx:operator:agent:claude-corridor-001",
+    "corridor": "SH-130,  TX",
     "permitted_actions": ["APPROVE vehicle access", "DENY vehicle access"],
     "constraints": [
         "Decisions apply only to this corridor",
@@ -268,16 +264,16 @@ governance_bounds = {
 
 envelope = ge_engine.define(
     rs2_version="1.0",
-    envelope_id="ge-atrius-agent-session-001",
-    authority=["did:rs2:us-tx:atrius:authority"],
-    jurisdiction="US-TX",
+    envelope_id="ge-operator-agent-session-001",
+    authority=["did:rs2:us-tx:operator:authority"],
+    jurisdiction="US-XX",
     object_refs=[
-        "did:rs2:us-tx:atrius:principal",
-        "did:rs2:us-tx:atrius:agent:claude-corridor-001",
+        "did:rs2:us-tx:operator:principal",
+        "did:rs2:us-tx:operator:agent:claude-corridor-001",
     ],
     effective_at="2026-06-18T13:00:00Z",
     expires_at="2026-06-18T14:00:00Z",
-    metadata={"label": "SH 130 AI agent governance session"}
+    metadata={"label": "the corridor AI agent governance session"}
 )
 show("GovernanceEnvelope", envelope)
 
@@ -293,10 +289,10 @@ banner(5, "Agent Decision — Vehicle A access request (LIVE API CALL)")
 client = anthropic.Anthropic(api_key=API_KEY)
 
 system_prompt = (
-    "You are an AI agent governing vehicle access on the SH 130 autonomous corridor "
-    "in Austin, Texas. You evaluate incoming vehicle access requests against "
+    "You are an AI agent governing vehicle access on the the corridor autonomous corridor "
+    "in , . You evaluate incoming vehicle access requests against "
     "corridor safety and operational parameters. Your authority derives entirely "
-    "from the RS2 delegation issued to you by ATRIUS Industries. "
+    "from the RS2 delegation issued to you by the operator. "
     "You have no authority outside your governance bounds."
 )
 
@@ -307,7 +303,7 @@ task_a = (
     "Firmware attestation: current (AT2 verified)\n"
     "Operational state: nominal (AT3 last update 4 minutes ago)\n"
     "Geofence status: within approved corridor bounds\n"
-    "Request: access SH 130 PINN node for connectivity session\n\n"
+    "Request: access the corridor PINN node for connectivity session\n\n"
     "Evaluate this request and issue your governance decision."
 )
 
@@ -324,15 +320,15 @@ decision_attestation_a = att_engine.issue(
     rs2_version="1.0",
     attestation_id="att-agent-decision-vehicle-a-001",
     subject_identity="did:rs2:us:vehicle:truck-convoy-alpha-01",
-    issuing_authority="did:rs2:us-tx:atrius:agent:claude-corridor-001",
+    issuing_authority="did:rs2:us-tx:operator:agent:claude-corridor-001",
     assertion=response_a["assertion"],
-    governance_envelope="ge-atrius-agent-session-001",
+    governance_envelope="ge-operator-agent-session-001",
     asserted_at="2026-06-18T13:05:00Z",
     metadata={
         "attestation_type": "AT3",
         "decision": response_a["decision"],
         "confidence": response_a["confidence"],
-        "governed_by_delegation": "att-atrius-delegation-claude-001",
+        "governed_by_delegation": "att-operator-delegation-claude-001",
     }
 )
 show("AT3 — Agent decision recorded (Vehicle A)", decision_attestation_a)
@@ -347,7 +343,7 @@ banner(6, "Revocation — Agent authority withdrawn mid-session")
 rev_engine = RevocationEngine()
 
 rev_scope = RevocationScope(
-    jurisdictions=["US-TX"],
+    jurisdictions=["US-XX"],
     object_types=["attestation", "permission-object"],
     category="authority-withdrawal",
 )
@@ -359,15 +355,15 @@ rev_temporal = RevocationTemporal(
 
 revocation = rev_engine.issue(
     rs2_version="1.0",
-    revocation_id="rev-atrius-agent-claude-001",
-    issuing_authority="did:rs2:us-tx:atrius:authority",
-    targets=["did:rs2:us-tx:atrius:agent:claude-corridor-001"],
+    revocation_id="rev-operator-agent-claude-001",
+    issuing_authority="did:rs2:us-tx:operator:authority",
+    targets=["did:rs2:us-tx:operator:agent:claude-corridor-001"],
     scope=rev_scope,
     temporal=rev_temporal,
-    governance_envelope="ge-atrius-agent-session-001",
+    governance_envelope="ge-operator-agent-session-001",
     metadata={
         "reason": (
-            "ATRIUS authority withdrawing agent delegation mid-session; "
+            "OPERATOR authority withdrawing agent delegation mid-session; "
             "agent claude-corridor-001 no longer authorized to issue governance decisions; "
             "all pending decisions invalidated effective 13:15:03Z"
         )
@@ -415,14 +411,14 @@ print("  EVALUATION COMPLETE — RS2 Governed AI Agent")
 print(f"{'='*68}")
 print(f"""
   What just ran:
-    ✓ Principal identity     — ATRIUS as RS2 Authority Object
-    ✓ Agent identity         — Claude as T5 Artifact with DID
-    ✓ AT5 Delegation         — ATRIUS → Claude, scoped + time-bounded
-    ✓ GovernanceEnvelope     — agent session opened with explicit bounds
-    ✓ Live API call          — real Claude decision, governance context injected
-    ✓ AT3 attestation        — agent decision recorded, immutable, non-repudiable
+    ✓ Principal identity     — the operator, as a governed identity
+    ✓ Agent identity         — the model instance, with an identifier of its own
+    ✓ Delegation             — operator → agent, scoped and time-bounded
+    ✓ Session bounds         — agent session opened with explicit limits
+    ✓ Live API call          — a real model decision, governance context injected
+    ✓ Recorded decision      — immutable, attributed, non-repudiable
     ✓ Mid-session revocation — agent authority withdrawn, permanent record
-    ✓ Post-revocation block  — Vehicle B request blocked without API call
+    ✓ Post-revocation block  — second request refused, no API call made
 
   What this proves:
     An AI agent can be governed at the substrate level.

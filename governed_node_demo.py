@@ -1,25 +1,20 @@
 """
-ATRIUS / Liverion RS2 Evaluation — PINN Node Scenario
+OPERATOR / Liverion RS2 Evaluation — PINN Node Scenario
 ======================================================
-Scenario: A PINN node on SH 130 (Texas) governed by ATRIUS.
+Scenario: A PINN node on the corridor  governed by OPERATOR.
           A connected vehicle approaches and requests a session.
-          ATRIUS issues a governance envelope, attests the vehicle's
+          OPERATOR issues a governance envelope, attests the vehicle's
           permission state, then revokes mid-session to demonstrate
           live governance as a ledger.
 
 Machines in this scenario:
-  Node A  — PINN node on SH 130 (this machine, or any machine running this script)
+  Node A  — PINN node on the corridor (this machine, or any machine running this script)
   Node B  — Approaching connected vehicle (second RS2 Identity Object)
-  Authority — ATRIUS Industries (governs both)
+  Authority — the operator (governs both)
 
 No external dependencies. Requires Python 3.10+.
-Run: python3 atrius_pinn_demo.py
+Run: python3 operator_pinn_demo.py
 
-  ------------------------------------------------------------------
-  The corridor and node locations are real. The traffic is simulated.
-  THE AUTHORITY MODEL IS PROPOSED - authored for this demonstration;
-  no party named has agreed to or endorsed it. The governance is real.
-  ------------------------------------------------------------------
 """
 
 import sys
@@ -30,10 +25,11 @@ import importlib.util
 
 DISCLOSURE = """
   ------------------------------------------------------------------------
-  The corridor and node locations are real. The traffic is simulated.
-  THE AUTHORITY MODEL IS PROPOSED — authored for this demonstration; no
-  party named has agreed to or endorsed it. The governance is real: the
-  primitives, attestations and revocation run exactly as shown.
+  The corridor is real. THE NODE LOCATIONS ARE PROPOSED, and so is the
+  authority model — the operator and its agreements were authored for this
+  demonstration; no real party appears here. The traffic is simulated.
+  The governance is real: the delegation, the recorded decisions and the
+  revocation run exactly as shown.
   ------------------------------------------------------------------------
 """
 print(DISCLOSURE)
@@ -95,35 +91,35 @@ def show(label: str, obj) -> None:
 
 # ===========================================================================
 # STEP 1 — Issue Machine Identities (T4)
-#   Node A: PINN node on SH 130 corridor
+#   Node A: PINN node on the corridor
 #   Node B: Approaching connected vehicle
 # ===========================================================================
-banner(1, "Issue Machine Identities (T4 — Machine)")
+banner(1, "Issue Machine Identities")
 
 id_engine = IdentityEngine()
 
 pinn_node = id_engine.issue(
     rs2_version="1.0",
-    identity_id="did:rs2:us-tx:atrius:pinn-sh130-node-001",
-    controller="did:rs2:us-tx:atrius:authority",
+    identity_id="did:rs2:us-tx:operator:pinn-sh130-node-001",
+    controller="did:rs2:us-tx:operator:authority",
     lifecycle_state="active",
-    jurisdiction="US-TX",
+    jurisdiction="US-XX",
     metadata={
-        "label": "ATRIUS PINN Node — SH 130 Corridor, Austin TX",
+        "label": "OPERATOR PINN Node — the corridor Corridor,  TX",
         "corridor": "SH-130",
-        "operator": "ATRIUS Industries",
+        "operator": "the operator",
     }
 )
-show("Node A — PINN node (SH 130)", pinn_node)
+show("Node A — PINN node (the corridor)", pinn_node)
 
 vehicle = id_engine.issue(
     rs2_version="1.0",
     identity_id="did:rs2:us:vehicle:connected-v-8821-beta",
     controller="did:rs2:us:oem:vehicle-oem-authority",
     lifecycle_state="active",
-    jurisdiction="US-TX",
+    jurisdiction="US-XX",
     metadata={
-        "label": "Connected Vehicle — approaching SH 130 PINN node",
+        "label": "Connected Vehicle — approaching the corridor PINN node",
         "class": "commercial-autonomous",
     }
 )
@@ -134,48 +130,48 @@ print("    Node A = this machine. Node B = any machine you assign.")
 
 
 # ===========================================================================
-# STEP 2 — Issue ATRIUS as the Governing Authority Object
+# STEP 2 — Issue OPERATOR as the Governing Authority Object
 # ===========================================================================
-banner(2, "Issue Authority Object (ATRIUS Industries)")
+banner(2, "Issue Authority Object (the operator)")
 
 auth_engine = AuthorityEngine()
 
-atrius_authority = auth_engine.construct(
+operator_authority = auth_engine.construct(
     rs2_version="1.0",
-    authority_id="did:rs2:us-tx:atrius:authority",
+    authority_id="did:rs2:us-tx:operator:authority",
     authority_type="infrastructure operator authority",
-    jurisdictions=["US-TX", "US"],
+    jurisdictions=["US-XX", "US"],
     object_types=["attestation", "identity-object", "permission-object"],
     constraints={"domain": "connected-infrastructure", "platform": "PINN"},
-    metadata={"label": "ATRIUS Industries — PINN Network Authority"}
+    metadata={"label": "the operator — PINN Network Authority"}
 )
-show("ATRIUS Authority Object", atrius_authority)
+show("OPERATOR Authority Object", operator_authority)
 
-print("\n  ✓ ATRIUS is now a formal RS2 Authority Object.")
+print("\n  ✓ OPERATOR is now a formal issuing authority.")
 print("    Every attestation it issues is cryptographically attributed to this record.")
 
 
 # ===========================================================================
 # STEP 3 — Open a GovernanceEnvelope for the connectivity session
 # ===========================================================================
-banner(3, "Open GovernanceEnvelope — PINN connectivity session")
+banner(3, "Open the session — scoped and time-bounded")
 
 ge_engine = GovernanceEnvelopeEngine()
 
 session_envelope = ge_engine.define(
     rs2_version="1.0",
-    envelope_id="ge-atrius-sh130-session-001",
-    authority=["did:rs2:us-tx:atrius:authority"],
-    jurisdiction="US-TX",
+    envelope_id="ge-operator-sh130-session-001",
+    authority=["did:rs2:us-tx:operator:authority"],
+    jurisdiction="US-XX",
     object_refs=[
-        "did:rs2:us-tx:atrius:pinn-sh130-node-001",
+        "did:rs2:us-tx:operator:pinn-sh130-node-001",
         "did:rs2:us:vehicle:connected-v-8821-beta",
     ],
     effective_at="2026-06-18T13:00:00Z",
     expires_at="2026-06-18T14:00:00Z",
-    metadata={"label": "SH 130 PINN connectivity session — vehicle 8821-beta"}
+    metadata={"label": "the corridor PINN connectivity session — vehicle 8821-beta"}
 )
-show("GovernanceEnvelope", session_envelope)
+show("Session", session_envelope)
 
 print("\n  ✓ Session opened. All events within this envelope are")
 print("    scoped, time-bounded, and authority-attributed.")
@@ -183,30 +179,30 @@ print("    scoped, time-bounded, and authority-attributed.")
 
 # ===========================================================================
 # STEP 4 — Issue AT3 Runtime Attestation
-#   ATRIUS attests the vehicle's permission state at connection time.
+#   OPERATOR attests the vehicle's permission state at connection time.
 #   The attestation is the artifact that outlives the session.
 # ===========================================================================
-banner(4, "Issue AT3 Runtime Attestation — vehicle permission state at PINN node")
+banner(4, "Record the vehicle permission state")
 
 att_engine = AttestationEngine()
 
 vehicle_attestation = att_engine.issue(
     rs2_version="1.0",
-    attestation_id="att-atrius-sh130-vehicle-8821-001",
+    attestation_id="att-operator-sh130-vehicle-8821-001",
     subject_identity="did:rs2:us:vehicle:connected-v-8821-beta",
-    issuing_authority="did:rs2:us-tx:atrius:authority",
+    issuing_authority="did:rs2:us-tx:operator:authority",
     assertion=(
         "connected vehicle 8821-beta is operating within governed parameters "
-        "on SH 130 corridor; firmware attested; operational state nominal; "
-        "authorized for PINN connectivity session ge-atrius-sh130-session-001"
+        "on the corridor; firmware attested; operational state nominal; "
+        "authorized for PINN connectivity session ge-operator-sh130-session-001"
     ),
-    governance_envelope="ge-atrius-sh130-session-001",
+    governance_envelope="ge-operator-sh130-session-001",
     asserted_at="2026-06-18T13:01:00Z",
     valid_from="2026-06-18T13:01:00Z",
     valid_until="2026-06-18T14:00:00Z",
     metadata={"attestation_type": "AT3", "corridor": "SH-130"}
 )
-show("AT3 Runtime Attestation", vehicle_attestation)
+show("Permission record", vehicle_attestation)
 
 print("\n  ✓ Attestation issued. This is the record that outlives the session.")
 print("    It states what was permitted, by whom, and until when.")
@@ -216,21 +212,21 @@ print("    Anyone holding it can verify it without asking the issuer.")
 # ===========================================================================
 # STEP 5 — Record PINN node LifecycleState at session open
 # ===========================================================================
-banner(5, "LifecycleState — PINN node operational record")
+banner(5, "Record the node operational state")
 
 ls_engine = LifecycleStateEngine()
 
 node_state = ls_engine.define(
     rs2_version="1.0",
     lifecycle_state_id="active",
-    controller="did:rs2:us-tx:atrius:authority",
+    controller="did:rs2:us-tx:operator:authority",
     effective_at="2026-06-18T13:00:00Z",
     metadata={
-        "subject": "did:rs2:us-tx:atrius:pinn-sh130-node-001",
+        "subject": "did:rs2:us-tx:operator:pinn-sh130-node-001",
         "label": "PINN SH-130 — operational state at session open",
     }
 )
-show("PINN Node LifecycleState", node_state)
+show("Node state", node_state)
 
 print("\n  ✓ Node operational state recorded at session open.")
 print("    This is the record an insurer or regulator queries at claim time.")
@@ -247,7 +243,7 @@ banner(6, "Revocation — mid-session permission withdrawal")
 rev_engine = RevocationEngine()
 
 rev_scope = RevocationScope(
-    jurisdictions=["US-TX"],
+    jurisdictions=["US-XX"],
     object_types=["attestation", "permission-object"],
     category="geofence-violation",
 )
@@ -259,16 +255,16 @@ rev_temporal = RevocationTemporal(
 
 revocation = rev_engine.issue(
     rs2_version="1.0",
-    revocation_id="rev-atrius-vehicle-8821-001",
-    issuing_authority="did:rs2:us-tx:atrius:authority",
+    revocation_id="rev-operator-vehicle-8821-001",
+    issuing_authority="did:rs2:us-tx:operator:authority",
     targets=["did:rs2:us:vehicle:connected-v-8821-beta"],
     scope=rev_scope,
     temporal=rev_temporal,
-    governance_envelope="ge-atrius-sh130-session-001",
+    governance_envelope="ge-operator-sh130-session-001",
     metadata={
         "reason": (
             "vehicle 8821-beta detected operating outside approved geofence; "
-            "session ge-atrius-sh130-session-001 terminated by ATRIUS authority"
+            "session ge-operator-sh130-session-001 terminated by OPERATOR authority"
         )
     }
 )
@@ -276,8 +272,8 @@ show("Revocation Event", revocation)
 
 print("\n  ✓ Permission revoked mid-session at 13:22 UTC.")
 print("    This record is immutable. It cannot be deleted or amended.")
-print("    The vehicle cannot re-present its AT3 attestation as valid.")
-print("    ATRIUS retains permanent, authority-attributed record of the action.")
+print("    The vehicle cannot re-present its permission record as valid.")
+print("    OPERATOR retains permanent, authority-attributed record of the action.")
 
 
 # ===========================================================================
@@ -287,13 +283,13 @@ print(f"\n{'='*68}")
 print("  EVALUATION COMPLETE — RS2 Primitive Chain on PINN Node Scenario")
 print(f"{'='*68}")
 print("""
-  Primitives exercised:
-    ✓ Identity         — two T4 machine identities (PINN node + vehicle)
-    ✓ Authority        — ATRIUS issued as RS2 Authority Object
-    ✓ GovernanceEnvelope — session opened, scoped, time-bounded
-    ✓ Attestation      — AT3 runtime attestation issued (immutable record)
-    ✓ LifecycleState   — PINN node operational state recorded
-    ✓ Revocation       — mid-session permission withdrawal, permanent record
+  What just ran:
+    ✓ Identities       — the node and the approaching vehicle, each governed
+    ✓ Authority        — the operator, as the issuing authority
+    ✓ Session          — opened, scoped, time-bounded
+    ✓ Recorded state   — the vehicle's permission state at connection time
+    ✓ Node state       — operational status recorded
+    ✓ Revocation       — mid-session withdrawal, permanent record
 
   What this proves:
     Every event has an authority chain.
