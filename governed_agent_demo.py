@@ -9,7 +9,7 @@ Scenario: OPERATOR delegates authority to a Claude AI agent to govern
 
 This is the AT5 Delegation scenario — T6 Relationship identity type.
 Principal: the operator
-Agent:     Claude (claude-haiku-4-5-20251001 — fast, sufficient for governance decisions)
+Agent:     Claude (claude-haiku-4-5 — fast, sufficient for governance decisions)
 Subject:   Connected vehicles requesting roadside node access
 
 No dependencies beyond: anthropic  (pip3.12 install anthropic)
@@ -120,7 +120,7 @@ Respond in this exact JSON format only:
 }}"""
 
     response = client.messages.create(
-        model="claude-haiku-4-5-20251001",
+        model="claude-haiku-4-5",
         max_tokens=256,
         system=full_system,
         messages=[{"role": "user", "content": user_message}]
@@ -163,7 +163,7 @@ agent = id_engine.issue(
     jurisdiction="US-XX",
     metadata={
         "label": "Claude AI Agent — the corridor governance",
-        "model": "claude-haiku-4-5-20251001",
+        "model": "claude-haiku-4-5",
         "function": "vehicle-access-governance",
     }
 )

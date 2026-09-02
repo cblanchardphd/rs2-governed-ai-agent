@@ -73,6 +73,26 @@ Every decision is an immutable, authority-attributed record.
 Revocation is immediate, non-negotiable, and permanent.  
 The governance layer does not depend on the agent's cooperation.
 
+### How the block is verified
+
+The refusal is not a printed claim. `delegation_revoked()` interrogates the
+revocation event issued moments earlier — whether the agent is among its
+`targets`, and whether the request instant falls at or after `effective_at`,
+both parsed as datetimes rather than compared as strings.
+
+The demo runs that predicate **twice**: once as a control, at the instant the
+first vehicle was approved, which must return `False`, and once at the second
+vehicle's request time. If the control ever returns `True` the run aborts with
+`DEMO INVALID` — a check that cannot tell before from after proves nothing, so
+the demo refuses to claim it did.
+
+Both paths are mutation-tested. Point the revocation at a different agent, or
+move `effective_at` past the request, and the demo exits non-zero rather than
+printing a block it did not earn.
+
+Exactly one `client.messages.create` exists in the file. The blocked request
+makes no API call because the revocation says so.
+
 ---
 
 Loquitur — a Liverion Corp. platform  
