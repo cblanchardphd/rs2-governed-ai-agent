@@ -14,12 +14,29 @@ Machines in this scenario:
 
 No external dependencies. Requires Python 3.10+.
 Run: python3 atrius_pinn_demo.py
+
+  ------------------------------------------------------------------
+  The corridor and node locations are real. The traffic is simulated.
+  THE AUTHORITY MODEL IS PROPOSED - authored for this demonstration;
+  no party named has agreed to or endorsed it. The governance is real.
+  ------------------------------------------------------------------
 """
 
 import sys
 import os
 import json
 import importlib.util
+
+
+DISCLOSURE = """
+  ------------------------------------------------------------------------
+  The corridor and node locations are real. The traffic is simulated.
+  THE AUTHORITY MODEL IS PROPOSED — authored for this demonstration; no
+  party named has agreed to or endorsed it. The governance is real: the
+  primitives, attestations and revocation run exactly as shown.
+  ------------------------------------------------------------------------
+"""
+print(DISCLOSURE)
 
 # ---------------------------------------------------------------------------
 # Path setup — RS2 RI files use hyphens in filenames; load via importlib
@@ -167,7 +184,7 @@ print("    scoped, time-bounded, and authority-attributed.")
 # ===========================================================================
 # STEP 4 — Issue AT3 Runtime Attestation
 #   ATRIUS attests the vehicle's permission state at connection time.
-#   This is the billable event — it would settle through CH2.
+#   The attestation is the artifact that outlives the session.
 # ===========================================================================
 banner(4, "Issue AT3 Runtime Attestation — vehicle permission state at PINN node")
 
@@ -191,9 +208,9 @@ vehicle_attestation = att_engine.issue(
 )
 show("AT3 Runtime Attestation", vehicle_attestation)
 
-print("\n  ✓ Attestation issued. This is the billable CH2 event.")
-print("    Rate: $0.01 issuer fee → $0.0085 to ATRIUS node, $0.0015 to Liverion.")
-print("    Verifier pays $0.")
+print("\n  ✓ Attestation issued. This is the record that outlives the session.")
+print("    It states what was permitted, by whom, and until when.")
+print("    Anyone holding it can verify it without asking the issuer.")
 
 
 # ===========================================================================
@@ -274,19 +291,20 @@ print("""
     ✓ Identity         — two T4 machine identities (PINN node + vehicle)
     ✓ Authority        — ATRIUS issued as RS2 Authority Object
     ✓ GovernanceEnvelope — session opened, scoped, time-bounded
-    ✓ Attestation      — AT3 runtime attestation issued (billable CH2 event)
+    ✓ Attestation      — AT3 runtime attestation issued (immutable record)
     ✓ LifecycleState   — PINN node operational state recorded
     ✓ Revocation       — mid-session permission withdrawal, permanent record
 
   What this proves:
     Every event has an authority chain.
     Every event has a permanent record.
-    Every AT3 attestation is a CH2 billing event.
+    Every event is verifiable by someone who was not party to it.
     Governance is a ledger — not a kill switch.
 
   Next step → Evaluation License Agreement
     Execute the Evaluation License Agreement.
     Embed RS2 in the PINN node firmware.
-    Every PINN node on SH 130, Corpus Christi, and Camp Mabry
-    becomes a CH2 clearinghouse billing point.
+    Every governed node produces the same record, on the same terms,
+    for anyone entitled to read it.
 """)
+print(DISCLOSURE)

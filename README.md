@@ -10,6 +10,14 @@ master U.S. utility filings — RS2, CH2, CSS, TwinOps, and AMX — prosecuted b
 
 ---
 
+> **What is real here, and what is not.** The corridor and the node locations are real.
+> The traffic is simulated. **The authority model is proposed** — the operating agreements,
+> escalation paths and record-ownership terms were authored for this demonstration, and no
+> party named in it has agreed to or endorsed any of them. The governance is real: the
+> primitives, the attestations and the revocation run exactly as shown.
+
+---
+
 ## Two Demos
 
 ### `atrius_pinn_demo.py` — Physical Infrastructure Governance

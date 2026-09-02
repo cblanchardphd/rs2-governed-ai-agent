@@ -15,6 +15,12 @@ Subject:   Connected vehicles requesting PINN node access
 No dependencies beyond: anthropic  (pip3.12 install anthropic)
 Requires Python 3.10+
 Run: python3.12 atrius_agent_demo.py
+
+  ------------------------------------------------------------------
+  The corridor and node locations are real. The traffic is simulated.
+  THE AUTHORITY MODEL IS PROPOSED - authored for this demonstration;
+  no party named has agreed to or endorsed it. The governance is real.
+  ------------------------------------------------------------------
 """
 
 import sys
@@ -24,6 +30,17 @@ import getpass
 import importlib.util
 
 import anthropic
+
+
+DISCLOSURE = """
+  ------------------------------------------------------------------------
+  The corridor and node locations are real. The traffic is simulated.
+  THE AUTHORITY MODEL IS PROPOSED — authored for this demonstration; no
+  party named has agreed to or endorsed it. The governance is real: the
+  primitives, attestations and revocation run exactly as shown.
+  ------------------------------------------------------------------------
+"""
+print(DISCLOSURE)
 
 # ---------------------------------------------------------------------------
 # API key — from environment or prompt
@@ -417,3 +434,4 @@ print(f"""
   This is what the standards bodies are still drafting.
   RS2 runs it. Today. On a MacBook Air.
 """)
+print(DISCLOSURE)
