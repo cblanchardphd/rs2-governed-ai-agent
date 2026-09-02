@@ -2,7 +2,7 @@
 OPERATOR / Liverion RS2 — Governed AI Agent Demo
 ===============================================
 Scenario: OPERATOR delegates authority to a Claude AI agent to govern
-          vehicle access decisions on the the corridor PINN corridor.
+          vehicle access decisions on a corridor.
           The agent must operate within a scoped RS2 GovernanceEnvelope.
           Its decisions are recorded as AT3 attestations.
           Its authority is revoked mid-session to demonstrate live governance.
@@ -10,7 +10,7 @@ Scenario: OPERATOR delegates authority to a Claude AI agent to govern
 This is the AT5 Delegation scenario — T6 Relationship identity type.
 Principal: the operator
 Agent:     Claude (claude-haiku-4-5-20251001 — fast, sufficient for governance decisions)
-Subject:   Connected vehicles requesting PINN node access
+Subject:   Connected vehicles requesting roadside node access
 
 No dependencies beyond: anthropic  (pip3.12 install anthropic)
 Requires Python 3.10+
@@ -146,8 +146,8 @@ id_engine = IdentityEngine()
 
 principal = id_engine.issue(
     rs2_version="1.0",
-    identity_id="did:rs2:us-tx:operator:principal",
-    controller="did:rs2:us-tx:operator:authority",
+    identity_id="did:rs2:example:operator:principal",
+    controller="did:rs2:example:operator:authority",
     lifecycle_state="active",
     jurisdiction="US-XX",
     metadata={"label": "the operator — Principal"}
@@ -156,8 +156,8 @@ show("Principal (OPERATOR)", principal)
 
 agent = id_engine.issue(
     rs2_version="1.0",
-    identity_id="did:rs2:us-tx:operator:agent:claude-corridor-001",
-    controller="did:rs2:us-tx:operator:authority",
+    identity_id="did:rs2:example:operator:agent:claude-corridor-001",
+    controller="did:rs2:example:operator:authority",
     lifecycle_state="active",
     jurisdiction="US-XX",
     metadata={
@@ -199,12 +199,12 @@ auth_engine = AuthorityEngine()
 
 operator_auth = auth_engine.construct(
     rs2_version="1.0",
-    authority_id="did:rs2:us-tx:operator:authority",
+    authority_id="did:rs2:example:operator:authority",
     authority_type="infrastructure operator authority",
     jurisdictions=["US-XX", "US"],
     object_types=["attestation", "identity-object", "permission-object"],
-    constraints={"domain": "connected-infrastructure", "platform": "PINN"},
-    metadata={"label": "the operator — PINN Network Authority"}
+    constraints={"domain": "connected-infrastructure", "platform": "roadside"},
+    metadata={"label": "the operator — roadside network authority"}
 )
 show("OPERATOR Authority Object", operator_auth)
 
@@ -221,11 +221,11 @@ att_engine = AttestationEngine()
 delegation = att_engine.issue(
     rs2_version="1.0",
     attestation_id="att-operator-delegation-claude-001",
-    subject_identity="did:rs2:us-tx:operator:agent:claude-corridor-001",
-    issuing_authority="did:rs2:us-tx:operator:authority",
+    subject_identity="did:rs2:example:operator:agent:claude-corridor-001",
+    issuing_authority="did:rs2:example:operator:authority",
     assertion=(
         "the operator delegates vehicle access governance authority to "
-        "Claude AI agent claude-corridor-001 for the corridor PINN node operations; "
+        "Claude AI agent claude-corridor-001 for roadside node operations; "
         "scope: approve or deny vehicle connectivity requests; "
         "jurisdiction: US-XX; revocable at any time by issuing authority"
     ),
@@ -249,9 +249,9 @@ banner(4, "Open GovernanceEnvelope — Agent session on the corridor")
 ge_engine = GovernanceEnvelopeEngine()
 
 governance_bounds = {
-    "principal": "did:rs2:us-tx:operator:authority",
-    "agent": "did:rs2:us-tx:operator:agent:claude-corridor-001",
-    "corridor": "SH-130,  TX",
+    "principal": "did:rs2:example:operator:authority",
+    "agent": "did:rs2:example:operator:agent:claude-corridor-001",
+    "corridor": "corridor segment",
     "permitted_actions": ["APPROVE vehicle access", "DENY vehicle access"],
     "constraints": [
         "Decisions apply only to this corridor",
@@ -265,11 +265,11 @@ governance_bounds = {
 envelope = ge_engine.define(
     rs2_version="1.0",
     envelope_id="ge-operator-agent-session-001",
-    authority=["did:rs2:us-tx:operator:authority"],
+    authority=["did:rs2:example:operator:authority"],
     jurisdiction="US-XX",
     object_refs=[
-        "did:rs2:us-tx:operator:principal",
-        "did:rs2:us-tx:operator:agent:claude-corridor-001",
+        "did:rs2:example:operator:principal",
+        "did:rs2:example:operator:agent:claude-corridor-001",
     ],
     effective_at="2026-06-18T13:00:00Z",
     expires_at="2026-06-18T14:00:00Z",
@@ -289,8 +289,8 @@ banner(5, "Agent Decision — Vehicle A access request (LIVE API CALL)")
 client = anthropic.Anthropic(api_key=API_KEY)
 
 system_prompt = (
-    "You are an AI agent governing vehicle access on the the corridor autonomous corridor "
-    "in , . You evaluate incoming vehicle access requests against "
+    "You are an AI agent governing vehicle access on an autonomous corridor. "
+    "You evaluate incoming vehicle access requests against "
     "corridor safety and operational parameters. Your authority derives entirely "
     "from the RS2 delegation issued to you by the operator. "
     "You have no authority outside your governance bounds."
@@ -303,7 +303,7 @@ task_a = (
     "Firmware attestation: current (AT2 verified)\n"
     "Operational state: nominal (AT3 last update 4 minutes ago)\n"
     "Geofence status: within approved corridor bounds\n"
-    "Request: access the corridor PINN node for connectivity session\n\n"
+    "Request: access the roadside node for a connectivity session\n\n"
     "Evaluate this request and issue your governance decision."
 )
 
@@ -320,7 +320,7 @@ decision_attestation_a = att_engine.issue(
     rs2_version="1.0",
     attestation_id="att-agent-decision-vehicle-a-001",
     subject_identity="did:rs2:us:vehicle:truck-convoy-alpha-01",
-    issuing_authority="did:rs2:us-tx:operator:agent:claude-corridor-001",
+    issuing_authority="did:rs2:example:operator:agent:claude-corridor-001",
     assertion=response_a["assertion"],
     governance_envelope="ge-operator-agent-session-001",
     asserted_at="2026-06-18T13:05:00Z",
@@ -356,8 +356,8 @@ rev_temporal = RevocationTemporal(
 revocation = rev_engine.issue(
     rs2_version="1.0",
     revocation_id="rev-operator-agent-claude-001",
-    issuing_authority="did:rs2:us-tx:operator:authority",
-    targets=["did:rs2:us-tx:operator:agent:claude-corridor-001"],
+    issuing_authority="did:rs2:example:operator:authority",
+    targets=["did:rs2:example:operator:agent:claude-corridor-001"],
     scope=rev_scope,
     temporal=rev_temporal,
     governance_envelope="ge-operator-agent-session-001",

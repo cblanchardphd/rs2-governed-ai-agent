@@ -1,19 +1,19 @@
 """
-OPERATOR / Liverion RS2 Evaluation — PINN Node Scenario
+Liverion RS2 Evaluation — governed roadside node
 ======================================================
-Scenario: A PINN node on the corridor  governed by OPERATOR.
+Scenario: A roadside node on a corridor, governed by the operator.
           A connected vehicle approaches and requests a session.
           OPERATOR issues a governance envelope, attests the vehicle's
           permission state, then revokes mid-session to demonstrate
           live governance as a ledger.
 
 Machines in this scenario:
-  Node A  — PINN node on the corridor (this machine, or any machine running this script)
+  Node A  — roadside node (this machine, or any machine running this script)
   Node B  — Approaching connected vehicle (second RS2 Identity Object)
   Authority — the operator (governs both)
 
 No external dependencies. Requires Python 3.10+.
-Run: python3 operator_pinn_demo.py
+Run: python3 governed_node_demo.py
 
 """
 
@@ -91,26 +91,26 @@ def show(label: str, obj) -> None:
 
 # ===========================================================================
 # STEP 1 — Issue Machine Identities (T4)
-#   Node A: PINN node on the corridor
+#   Node A: roadside node
 #   Node B: Approaching connected vehicle
 # ===========================================================================
 banner(1, "Issue Machine Identities")
 
 id_engine = IdentityEngine()
 
-pinn_node = id_engine.issue(
+roadside_node = id_engine.issue(
     rs2_version="1.0",
-    identity_id="did:rs2:us-tx:operator:pinn-sh130-node-001",
-    controller="did:rs2:us-tx:operator:authority",
+    identity_id="did:rs2:example:operator:roadside-node-001",
+    controller="did:rs2:example:operator:authority",
     lifecycle_state="active",
     jurisdiction="US-XX",
     metadata={
-        "label": "OPERATOR PINN Node — the corridor Corridor,  TX",
-        "corridor": "SH-130",
+        "label": "Roadside node — corridor segment",
+        "corridor": "corridor segment",
         "operator": "the operator",
     }
 )
-show("Node A — PINN node (the corridor)", pinn_node)
+show("Node A — roadside node", roadside_node)
 
 vehicle = id_engine.issue(
     rs2_version="1.0",
@@ -119,7 +119,7 @@ vehicle = id_engine.issue(
     lifecycle_state="active",
     jurisdiction="US-XX",
     metadata={
-        "label": "Connected Vehicle — approaching the corridor PINN node",
+        "label": "Connected vehicle — approaching the roadside node",
         "class": "commercial-autonomous",
     }
 )
@@ -138,12 +138,12 @@ auth_engine = AuthorityEngine()
 
 operator_authority = auth_engine.construct(
     rs2_version="1.0",
-    authority_id="did:rs2:us-tx:operator:authority",
+    authority_id="did:rs2:example:operator:authority",
     authority_type="infrastructure operator authority",
     jurisdictions=["US-XX", "US"],
     object_types=["attestation", "identity-object", "permission-object"],
-    constraints={"domain": "connected-infrastructure", "platform": "PINN"},
-    metadata={"label": "the operator — PINN Network Authority"}
+    constraints={"domain": "connected-infrastructure", "platform": "roadside"},
+    metadata={"label": "the operator — roadside network authority"}
 )
 show("OPERATOR Authority Object", operator_authority)
 
@@ -160,16 +160,16 @@ ge_engine = GovernanceEnvelopeEngine()
 
 session_envelope = ge_engine.define(
     rs2_version="1.0",
-    envelope_id="ge-operator-sh130-session-001",
-    authority=["did:rs2:us-tx:operator:authority"],
+    envelope_id="ge-operator-corridor-session-001",
+    authority=["did:rs2:example:operator:authority"],
     jurisdiction="US-XX",
     object_refs=[
-        "did:rs2:us-tx:operator:pinn-sh130-node-001",
+        "did:rs2:example:operator:roadside-node-001",
         "did:rs2:us:vehicle:connected-v-8821-beta",
     ],
     effective_at="2026-06-18T13:00:00Z",
     expires_at="2026-06-18T14:00:00Z",
-    metadata={"label": "the corridor PINN connectivity session — vehicle 8821-beta"}
+    metadata={"label": "Roadside connectivity session — vehicle 8821-beta"}
 )
 show("Session", session_envelope)
 
@@ -188,19 +188,19 @@ att_engine = AttestationEngine()
 
 vehicle_attestation = att_engine.issue(
     rs2_version="1.0",
-    attestation_id="att-operator-sh130-vehicle-8821-001",
+    attestation_id="att-operator-corridor-vehicle-8821-001",
     subject_identity="did:rs2:us:vehicle:connected-v-8821-beta",
-    issuing_authority="did:rs2:us-tx:operator:authority",
+    issuing_authority="did:rs2:example:operator:authority",
     assertion=(
         "connected vehicle 8821-beta is operating within governed parameters "
         "on the corridor; firmware attested; operational state nominal; "
-        "authorized for PINN connectivity session ge-operator-sh130-session-001"
+        "authorized for connectivity session ge-operator-corridor-session-001"
     ),
-    governance_envelope="ge-operator-sh130-session-001",
+    governance_envelope="ge-operator-corridor-session-001",
     asserted_at="2026-06-18T13:01:00Z",
     valid_from="2026-06-18T13:01:00Z",
     valid_until="2026-06-18T14:00:00Z",
-    metadata={"attestation_type": "AT3", "corridor": "SH-130"}
+    metadata={"attestation_type": "AT3", "corridor": "corridor segment"}
 )
 show("Permission record", vehicle_attestation)
 
@@ -210,7 +210,7 @@ print("    Anyone holding it can verify it without asking the issuer.")
 
 
 # ===========================================================================
-# STEP 5 — Record PINN node LifecycleState at session open
+# STEP 5 — Record the roadside node state at session open
 # ===========================================================================
 banner(5, "Record the node operational state")
 
@@ -219,11 +219,11 @@ ls_engine = LifecycleStateEngine()
 node_state = ls_engine.define(
     rs2_version="1.0",
     lifecycle_state_id="active",
-    controller="did:rs2:us-tx:operator:authority",
+    controller="did:rs2:example:operator:authority",
     effective_at="2026-06-18T13:00:00Z",
     metadata={
-        "subject": "did:rs2:us-tx:operator:pinn-sh130-node-001",
-        "label": "PINN SH-130 — operational state at session open",
+        "subject": "did:rs2:example:operator:roadside-node-001",
+        "label": "Roadside node — operational state at session open",
     }
 )
 show("Node state", node_state)
@@ -256,15 +256,15 @@ rev_temporal = RevocationTemporal(
 revocation = rev_engine.issue(
     rs2_version="1.0",
     revocation_id="rev-operator-vehicle-8821-001",
-    issuing_authority="did:rs2:us-tx:operator:authority",
+    issuing_authority="did:rs2:example:operator:authority",
     targets=["did:rs2:us:vehicle:connected-v-8821-beta"],
     scope=rev_scope,
     temporal=rev_temporal,
-    governance_envelope="ge-operator-sh130-session-001",
+    governance_envelope="ge-operator-corridor-session-001",
     metadata={
         "reason": (
             "vehicle 8821-beta detected operating outside approved geofence; "
-            "session ge-operator-sh130-session-001 terminated by OPERATOR authority"
+            "session ge-operator-corridor-session-001 terminated by OPERATOR authority"
         )
     }
 )
@@ -280,7 +280,7 @@ print("    OPERATOR retains permanent, authority-attributed record of the action
 # Summary
 # ===========================================================================
 print(f"\n{'='*68}")
-print("  EVALUATION COMPLETE — RS2 Primitive Chain on PINN Node Scenario")
+print("  EVALUATION COMPLETE — governed roadside node scenario")
 print(f"{'='*68}")
 print("""
   What just ran:
@@ -299,7 +299,7 @@ print("""
 
   Next step → Evaluation License Agreement
     Execute the Evaluation License Agreement.
-    Embed RS2 in the PINN node firmware.
+    Embed RS2 in the node firmware.
     Every governed node produces the same record, on the same terms,
     for anyone entitled to read it.
 """)
